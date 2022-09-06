@@ -1,33 +1,43 @@
-import requests
-import time
-import os
+import json
 
-# Getting the token
+# Getting the players
+playerList = []
+with open("Players.txt", 'r') as f:
+	f.readline()
+	for line in f:
+		playerList.append(line.strip())
 
-TOKEN_ENVIRON_NAME = "X-Riot-Token"
-token = ""
+with open("PlayersNumber.txt", 'r') as f:
+	playerNumber = int(f.readline())
 
-if "X-Riot-Token" in os.environ:
-	token = os.environ[TOKEN_ENVIRON_NAME]
-else:
-	print("No Riot token available")
-	exit()
+with open("GamesSeen.txt", 'r') as f:
+	gameNumber = int(f.readline())
 
-# Getting the puuid
+with open("MatchData.txt", 'r') as f:
+	for i in range(gameNumber):
+		f.readline()
+	for line in f:
+		gameDictionary = json.loads(line.strip())
+		for player in gameDictionary["info"]["participants"]:
+			if player["puuid"] not in playerList:
+				playerList.append(player["puuid"])
+		gameNumber += 1
+		with open("Players.txt", 'a') as f:
+			for player in playerList[int(playerNumber):]:
+				f.write("\n")
+				f.write(player)
+		playerNumber = len(playerList)
+		with open("PlayersNumber.txt", 'w') as f:
+			f.write(str(len(playerList)))
 
-playerOne = "idusia123"
-puuidOne = ""
-puuidURL = "https://eun1.api.riotgames.com/lol/summoner/v4/summoners/by-name/" + playerOne
+		with open("GamesSeen.txt", 'w') as f:
+			f.write(str(gameNumber))
 
-head = {
-		"X-Riot-Token": token,
-  		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:104.0) Gecko/20100101 Firefox/104.0",
-    	"Accept-Language": "en,en-US;q=0.7,pl;q=0.3",
-    	"Accept-Charset": "application/x-www-form-urlencoded; charset=UTF-8",
-    	"Origin": "https://developer.riotgames.com"
-		}
-body = {"apiName": "summoner-v4", "apiSampleName": "summoner-v4", "methodName": "getBySummonerName", "httpMethod": "GET", "summonerName": playerOne, "execute_against": "EUN1", "app": "440615", "app_key_url": "0"}
-
-r1 = requests.post(puuidURL, headers = head, data = body)
-print(r1.status_code)
-
+#writing - to be used only in first iteration
+"""
+with open("Players.txt", 'w') as f:
+	f.write("Player puuids")
+	for player in playerList:
+		f.write("\n")
+		f.write(player)
+"""
