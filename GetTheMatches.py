@@ -41,9 +41,9 @@ head = {"X-Riot-Token": token}
 
 for puuid in puuids:
 	start = 0
-	print("Downloading matches for player " + puuid + "\n")
+	print("Downloading matches for player " + puuid)
 	while(True):
-		print("Getting games from " + str(start) + "to " + str(start+count) + "\n")
+		print("Getting games from " + str(start) + " to " + str(start+count))
 		puuidURL = f"https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids?start={start}&count={count}"
 		r1 = requests.get(puuidURL, headers = head)
 
