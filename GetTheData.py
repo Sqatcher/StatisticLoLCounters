@@ -31,14 +31,18 @@ sleepTime = 120/100 + 0.1         # 100 every 2 minutes is max
 head = {"X-Riot-Token": token}
 
 for match in matchIDs:
-	print("Downloading match " + match + "\n")
+	print("Downloading match " + match)
 	
 	matchURL = f"https://europe.api.riotgames.com/lol/match/v5/matches/{match}"
 	r1 = requests.get(matchURL, headers = head)
 
 	if r1.status_code != 200:
 		print("Request failed, status code: " + str(r1.status_code))
-		break
+		if r1.status_code == 404:
+			print("Error 404 - skipping the match")
+			continue
+		else:
+			break
 	matchData = r1.json()
 	
 	with open("MatchData.txt", 'a') as f:

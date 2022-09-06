@@ -60,8 +60,13 @@ for puuid in puuids:
 		time.sleep(sleepTime)
 
 	if r1.status_code != 200:
-		break
-
+		print("Request failed, status code: " + str(r1.status_code))
+		if r1.status_code == 404:
+			print("Error 404 - skipping the match")
+			continue
+		else:
+			break
+		
 	playersSeen += 1
 	with open("MatchIds.txt", 'a') as f:
 		for matchID in matchList[int(startPoint):]:
