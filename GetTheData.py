@@ -5,6 +5,7 @@ import json
 
 # Getting the token
 
+SLEEP_503 = 120
 TOKEN_ENVIRON_NAME = "X-Riot-Token"
 token = ""
 
@@ -31,6 +32,7 @@ sleepTime = 120/100 + 0.1         # 100 every 2 minutes is max
 head = {"X-Riot-Token": token}
 
 for match in matchIDs:
+	time.sleep(sleepTime)
 	print("Downloading match " + match)
 	
 	matchURL = f"https://europe.api.riotgames.com/lol/match/v5/matches/{match}"
@@ -41,8 +43,11 @@ for match in matchIDs:
 		if r1.status_code == 404:
 			print("Error 404 - skipping the match")
 			continue
-		else:
-			break
+		if r1.status_code == 503:
+			print("Error 503 - service unavailable. Sleeping " + str(SLEEP_503) + " seconds")
+			time.sleep(SLEEP_503)
+			continue
+		break
 	matchData = r1.json()
 	
 	with open("MatchData.txt", 'a') as f:
@@ -52,5 +57,3 @@ for match in matchIDs:
 	matchNumber += 1
 	with open("MatchDataNumber.txt", 'w') as f:
 		f.write(str(matchNumber))
-
-	time.sleep(sleepTime)
