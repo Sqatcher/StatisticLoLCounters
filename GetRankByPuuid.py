@@ -23,7 +23,6 @@ UPDATE_SQL = "UPDATE players SET id = %s, solorank = %s, flexrank = %s WHERE puu
 # Getting the token
 
 SLEEP_503 = 120
-SLEEP_429 = 60
 TOKEN_ENVIRON_NAME = "X-Riot-Token"
 token = ""
 
@@ -62,8 +61,9 @@ with open("PlayersWithRank.txt", 'r') as f:
 					time.sleep(SLEEP_503)
 				else:
 					if r1.status_code == 429:
-						print("Error 429 - Rate Limit Exceeded. Sleeping " + str(SLEEP_429) + " seconds")
-						time.sleep(SLEEP_429)
+						sleep_429 = int(r1.headers["Retry-After"]) + 1
+						print("Error 429 - Rate Limit Exceeded. Sleeping " + str(sleep_429) + " seconds")
+						time.sleep(sleep_429)
 					else:
 						break
 			else:
@@ -78,7 +78,7 @@ with open("PlayersWithRank.txt", 'r') as f:
 		rankURL = f"https://eun1.api.riotgames.com/lol/league/v4/entries/by-summoner/{id}"
 
 		while True:		
-			time.sleep(sleepTime)	
+			time.sleep(60/8 + 1)	
 			r1 = requests.get(rankURL, headers = head)
 			if r1.status_code != 200:
 				print("Request failed, status code: " + str(r1.status_code))
@@ -88,8 +88,9 @@ with open("PlayersWithRank.txt", 'r') as f:
 					time.sleep(SLEEP_503)
 				else:
 					if r1.status_code == 429:
-						print("Error 429 - Rate Limit Exceeded. Sleeping " + str(SLEEP_429) + " seconds")
-						time.sleep(SLEEP_429)
+						sleep_429 = int(r1.headers["Retry-After"]) + 1
+						print("Error 429 - Rate Limit Exceeded. Sleeping " + str(sleep_429) + " seconds")
+						time.sleep(sleep_429)
 					else:
 						break
 			else:
