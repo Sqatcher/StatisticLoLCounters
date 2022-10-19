@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8"> 
+		<title>LoL Data</title>
+		<link rel="icon" href="HTML_page/Me.png">
+		<link rel="stylesheet" href="loldatastyles.css">
+		<script>
+			let TOTAL_GAMES_NUMBER = 799888;
+			function addLoLIcons() {
+				let i;
+				let championNames = [
+				"Aatrox",
+"Ahri",
+"Akali",
+"Akshan",
+"Alistar",
+"Amumu",
+"Anivia",
+"Annie",
+"Aphelios",
+"Ashe",
+"AurelionSol",
+"Azir",
+"Bard",
+"Belveth",
+"Blitzcrank",
+"Brand",
+"Braum",
+"Caitlyn",
+"Camille",
+"Cassiopeia",
+"Chogath",
+"Corki",
+"Darius",
+"Diana",
+"Draven",
+"DrMundo",
+"Ekko",
+"Elise",
+"Evelynn",
+"Ezreal",
+"Fiddlesticks",
+"Fiora",
+"Fizz",
+"Galio",
+"Gangplank",
+"Garen",
+"Gnar",
+"Gragas",
+"Graves",
+"Gwen",
+"Hecarim",
+"Heimerdinger",
+"Illaoi",
+"Irelia",
+"Ivern",
+"Janna",
+"JarvanIV",
+"Jax",
+"Jayce",
+"Jhin",
+"Jinx",
+"Kaisa",
+"Kalista",
+"Karma",
+"Karthus",
+"Kassadin",
+"Katarina",
+"Kayle",
+"Kayn",
+"Kennen",
+"Khazix",
+"Kindred",
+"Kled",
+"KogMaw",
+"Leblanc",
+"LeeSin",
+"Leona",
+"Lillia",
+"Lissandra",
+"Lucian",
+"Lulu",
+"Lux",
+"Malphite",
+"Malzahar",
+"Maokai",
+"MasterYi",
+"MissFortune",
+"MonkeyKing",
+"Mordekaiser",
+"Morgana",
+"Nami",
+"Nasus",
+"Nautilus",
+"Neeko",
+"Nidalee",
+"Nilah",
+"Nocturne",
+"Nunu",
+"Olaf",
+"Orianna",
+"Ornn",
+"Pantheon",
+"Poppy",
+"Pyke",
+"Qiyana",
+"Quinn",
+"Rakan",
+"Rammus",
+"RekSai",
+"Rell",
+"Renata",
+"Renekton",
+"Rengar",
+"Riven",
+"Rumble",
+"Ryze",
+"Samira",
+"Sejuani",
+"Senna",
+"Seraphine",
+"Sett",
+"Shaco",
+"Shen",
+"Shyvana",
+"Singed",
+"Sion",
+"Sivir",
+"Skarner",
+"Sona",
+"Soraka",
+"Swain",
+"Sylas",
+"Syndra",
+"TahmKench",
+"Taliyah",
+"Talon",
+"Taric",
+"Teemo",
+"Thresh",
+"Tristana",
+"Trundle",
+"Tryndamere",
+"TwistedFate",
+"Twitch",
+"Udyr",
+"Urgot",
+"Varus",
+"Vayne",
+"Veigar",
+"Velkoz",
+"Vex",
+"Vi",
+"Viego",
+"Viktor",
+"Vladimir",
+"Volibear",
+"Warwick",
+"Xayah",
+"Xerath",
+"XinZhao",
+"Yasuo",
+"Yone",
+"Yorick",
+"Yuumi",
+"Zac",
+"Zed",
+"Zeri",
+"Ziggs",
+"Zilean",
+"Zoe",
+"Zyra"
+				];
+				let URL_ICON_PREFIX = "http://ddragon.leagueoflegends.com/cdn/12.19.1/img/champion/"
+				let div = document.getElementById("IconDiv");
+				let enemyDiv = document.getElementById("EnemyIconDiv");
+				for (i=0; i<161; i++)
+				{
+					let imageToAdd = document.createElement("img");
+					//imageToAdd.src = "LoLChampionIcons/" + championNames[i] + ".png";
+					imageToAdd.src = URL_ICON_PREFIX + championNames[i] + ".png";
+					imageToAdd.alt = championNames[i];
+					imageToAdd.id = championNames[i] + "Icon";
+					imageToAdd.onclick = function() { makeIconActive(this.id, this.alt); }
+					div.appendChild(imageToAdd)
+
+					let imageToAdd2 = document.createElement("img");
+					imageToAdd2.src = URL_ICON_PREFIX + championNames[i] + ".png";
+					imageToAdd2.alt = championNames[i];
+					imageToAdd2.id = championNames[i] + "EnemyIcon";
+					imageToAdd2.onclick = function() { makeEnemyIconActive(this.id, this.alt); }
+					enemyDiv.appendChild(imageToAdd2);
+				}
+			}
+
+			function makeIconActive(iconId, player) {	
+				for (elem of document.getElementsByClassName("activeImg"))
+				{
+					elem.classList.remove("activeImg");
+				}
+				document.getElementById(iconId).classList.add("activeImg");
+				playerOne = player;
+				if (isDataShown)
+				{
+					updateChart();
+				}
+			}
+
+			function makeEnemyIconActive(iconId, player) {	
+				for (elem of document.getElementsByClassName("activeEnemyImg"))
+				{
+					elem.classList.remove("activeEnemyImg");
+				}
+				document.getElementById(iconId).classList.add("activeEnemyImg");
+				playerTwo = player;
+				if (isDataShown)
+				{
+					updateChart();
+				}
+			}
+
+			function makeLaneIconActive(iconId, role, role2) {	
+				for (elem of document.getElementsByClassName("activeLaneIcon"))
+				{
+					elem.classList.remove("activeLaneIcon");
+				}
+				document.getElementById(iconId).classList.add("activeLaneIcon");
+				lane = role;
+				laneImg = role2;
+				if (isDataShown)
+				{
+					updateChart();
+				}
+			}
+
+			let playerOne = "";
+			let playerTwo = "";
+			let lane = "";
+			let laneImg = "";
+
+			let plotData;
+			let plot_baskets = 20;
+			let games_cutoff = 40;
+			let isDataShown = false;
+
+			function updateChart() {
+				if (isDataShown == false)
+				{
+					if (playerOne == "" || playerTwo == "" || lane == "")
+					{
+						document.getElementById("errorText").style.display = "block";
+						return;	
+					}
+					document.getElementById("dataDiv").style.display = "block";
+					document.getElementById("showResultsButton").style.display = "none";
+					document.getElementById("errorText").style.display = "none";
+					isDataShown = true;
+				}
+				
+				plotData = [];
+
+				plotData = championData.filter(chooseTheChampion);
+				plotData = plotData.filter(chooseTheLane);
+				console.log(games_cutoff);
+				plotData = plotData.filter(filterCount);			
+				console.log(plotData);
+				if (plotData.length == 0)
+				{
+					document.getElementById("chart").style.display = "none";
+					document.getElementById("chartTitle").style.display = "none";
+				}
+				else
+				{
+					document.getElementById("chart").style.display = "block";
+					document.getElementById("chartTitle").style.display = "block";
+
+					plotData.sort(sortByRatio);
+					plotData.forEach(element => element.winRatio = Math.round(element.winRatio*100)/100)
+					//plotData = plotData.slice(0,20);
+					update = myChart.update(d3.sort(plotData.slice(0,plot_baskets), order2));
+
+					document.getElementById("chartTitle").textContent = Math.min(plot_baskets, plotData.length) + " best win ratios against " + playerOne + " playing " + laneImg;
+				}
+				
+				
+				let vDiv = document.getElementById("versusDiv");
+				vDiv.children[0].src = "http://ddragon.leagueoflegends.com/cdn/12.19.1/img/champion/" + playerOne + ".png";
+				vDiv.children[1].src = "HTML_page/" + laneImg + "_icon.jpg"
+				vDiv.children[2].src = "http://ddragon.leagueoflegends.com/cdn/12.19.1/img/champion/" + playerTwo + ".png";
+				vDiv.children[4].textContent = playerTwo + " playing against " + playerOne;
+
+				theOneAndOnly = plotData.filter(chooseTheChampionTwo);
+				console.log(theOneAndOnly);
+				if (theOneAndOnly.length == 0)
+				{
+					vDiv.children[8].textContent = "No data";
+					vDiv.children[11].textContent = "No data";
+					vDiv.children[14].textContent = "No data";
+					vDiv.children[17].textContent = "No data";
+				}
+				else
+				{
+					vDiv.children[8].textContent = theOneAndOnly[0]["gamesWon"];
+					vDiv.children[11].textContent = theOneAndOnly[0]["gamesLost"];
+					vDiv.children[14].textContent = theOneAndOnly[0]["gamesPlayed"];
+					vDiv.children[17].textContent = Math.round(theOneAndOnly[0]["winRatio"]*100)/100 + "%";
+				}
+			}
+
+			function chooseTheChampion(entry)
+			{
+				return entry["playerOne"] == playerOne;
+			}
+			function chooseTheChampionTwo(entry)
+			{
+				return entry["playerTwo"] == playerTwo;
+			}
+			function chooseTheLane(entry)
+			{
+				return entry["lane"] == lane;
+			}
+			function sortByRatio(entry1, entry2)
+			{
+				if (entry1["winRatio"] == entry2["winRatio"])
+				{
+					return 0;
+				}
+				return (entry1["winRatio"] > entry2["winRatio"]) ? -1 : 1;
+			}
+			function filterCount(entry)
+			{
+				return parseInt(entry["gamesPlayed"]) >= games_cutoff;
+			}
+
+			let icons;
+			let enemyIcons;
+			window.onload = function() {
+				addLoLIcons();
+				icons = document.getElementById("IconDiv").children;
+				enemyIcons = document.getElementById("EnemyIconDiv").children;
+
+				let searchInput = document.querySelector("[icon-search]")
+
+				searchInput.addEventListener("input", e => {
+					let value = e.target.value;
+					value = value.toLowerCase();
+					
+					for (let i=0; i<icons.length; i++)
+					{	
+						let isVisible = icons[i].alt.toLowerCase().includes(value);
+						icons[i].classList.toggle("hide", !isVisible);
+					}
+				})
+
+				let searchInput2 = document.querySelector("[enemy-icon-search]")
+
+				searchInput2.addEventListener("input", e => {
+					let value = e.target.value;
+					value = value.toLowerCase();
+					
+					for (let i=0; i<enemyIcons.length; i++)
+					{	
+						let isVisible = enemyIcons[i].alt.toLowerCase().includes(value);
+						enemyIcons[i].classList.toggle("hide", !isVisible);
+					}
+				})
+
+				let cutoffInput = document.querySelector("[cutoff-input]");
+				cutoffInput.addEventListener("input", e => {
+					games_cutoff = e.target.value;
+					if(isDataShown)
+					{
+						updateChart();
+					}
+				})
+
+				let plotBasketInput = document.querySelector("[plot-basket-input]");
+				plotBasketInput.addEventListener("input", e => {
+					plot_baskets = e.target.value;
+					if(isDataShown)
+					{
+						updateChart();
+					}
+				})
+			};
+		</script>
+	</head>
+	<body>
+		<div class="navbar">
+			<a href="index.html">Home</a>
+			<a href="counter.html">Choose your counter</a>
+			<a href="about.html">About</a>
+		</div>
+		<div style="float: none; height: 50px;"></div>
+		<h1>Choose the champion you are playing against:</h1>
+		<input id="searchIconInput" type="search" icon-search>
+		<div id="IconDiv">
+
+		</div>
+		<br>
+		<br>
+		<h1>Choose your lane:</h1>
+		<div id="LaneIconDiv">
+			<img id="TopIcon" class="lane-icon" src="HTML_page/Top_icon.jpg" onclick="makeLaneIconActive('TopIcon', 'TOP', 'Top')" alt="TopIcon">
+			<img id="JungleIcon" class="lane-icon" src="HTML_page/Jungle_icon.jpg" onclick="makeLaneIconActive('JungleIcon', 'JUNGLE', 'Jungle')" alt="JungleIcon">
+			<img id="MidIcon" class="lane-icon" src="HTML_page/Mid_icon.jpg" onclick="makeLaneIconActive('MidIcon', 'MIDDLE', 'Mid')" alt="MidIcon">
+			<img id="BotIcon" class="lane-icon" src="HTML_page/Bot_icon.jpg" onclick="makeLaneIconActive('BotIcon', 'BOTTOM', 'Bot')" alt="BotIcon">
+			<img id="SupportIcon" class="lane-icon" src="HTML_page/Support_icon.jpg" onclick="makeLaneIconActive('SupportIcon', 'UTILITY', 'Support')" alt="SupportIcon">
+		</div>
+		<br>
+		<br>
+		<h1>Choose the champion you want to play:</h1>
+		<input id="searchEnemyIconInput" type="search" enemy-icon-search>
+		<div id="EnemyIconDiv">
+
+		</div>
+		<br>
+		<div style="margin: auto; width: 80%; margin-top: 20px; text-align: center;">
+			<div style="display: grid; grid-template-columns: auto auto;">
+				<p style="font-size: 20px; font-family: fantasy">Set the maximum number of champions to be shown on the plot: </p>
+				<input id="plotBasketInput" style="width: 50%" type="number" value="20" style="margin-top: 0px" plot-basket-input>
+				<p style="font-size: 20px; font-family: fantasy">Set the minimal number of games played to be included: </p>
+				<input id="gamesCutoffInput" style="width: 50%" type="number" value="40" style="margin-top: 0px" cutoff-input>
+			</div>
+			<br>
+			<button id="showResultsButton" class="button-9" onclick="updateChart()">Show results</button>
+			<p id="errorText" style="display: none; font-size: 25px; font-family: fantasy; color: red;">Data insufficient. Click more boxes.</p>
+		</div>
+		<br>
+		<div id="dataDiv" style="display: none;">
+			<h1 id="chartTitle"></h1>
+			<div id="chart"></div>
+			<div id="versusDiv">
+				<img src="http://ddragon.leagueoflegends.com/cdn/12.19.1/img/champion/AurelionSol.png" alt="Icon1" style="border: 5px solid red;">
+				<img src="HTML_page/Mid_icon.jpg" alt="laneIcon" style="border: 5px solid orange;">
+				<img src="http://ddragon.leagueoflegends.com/cdn/12.19.1/img/champion/Ahri.png" alt="Icon2" style="border: 5px solid greenyellow;">
+
+				<p></p>
+				<p></p>
+				<p></p>
+
+				<p>Games won:</p>
+				<p></p>
+				<p>60</p>
+
+				<p>Games lost:</p>
+				<p></p>
+				<p>60</p>
+
+				<p>Games played:</p>
+				<p></p>
+				<p>120</p>
+
+				<p><b>Win ratio:</b></p>
+				<p></p>
+				<p><b>50%</b></p>
+			</div>
+			<div style="margin: auto; text-align: center;"><p style="font-size: 12px;">Based on 799888 games from season 12</p></div>
+		</div>
+		<script src="https://d3js.org/d3.v7.min.js"></script>
+		<script type="text/javascript" src="HTML_page/d3plot.js"></script>
+	</body>
+</html>
