@@ -2,6 +2,7 @@ import requests
 import time
 import os
 from collections import OrderedDict
+import boto3
 
 # Getting the token
 
@@ -9,11 +10,20 @@ SLEEP_503 = 120
 TOKEN_ENVIRON_NAME = "X-Riot-Token"
 token = ""
 
-if "X-Riot-Token" in os.environ:
-	token = os.environ[TOKEN_ENVIRON_NAME]
-else:
-	print("No Riot token available")
-	exit()
+sqs = boto3.client('sqs')
+SQS_TOKEN_URL = 'https://sqs.eu-west-1.amazonaws.com/765941628235/RiotXTokenQueue'
+    
+response = sqs.receive_message(QueueUrl = SQS_TOKEN_URL)
+print(response)
+if 'Messages' not in response:
+   	pass
+ 
+token = response['Messages'][0]['Body']
+print(token)
+
+# message = response['Messages'][0]
+# receipt_handle = message['ReceiptHandle']
+
 
 # Getting the matches
 matchList = []
