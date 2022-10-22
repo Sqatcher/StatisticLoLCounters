@@ -12,12 +12,17 @@
 			a {
 				text-decoration: none;
 			}
+
+			img {
+				width: 100%;
+			}
 		</style>
 	</head>
 	<body>
 		<div class="navbar">
 			<a href="index.html">Home</a>
 			<a href="counter.html">Choose your counter</a>
+			<a href="analysis.html">Analysis</a>
 			<a href="about.html">About</a>
 		</div>
 		<div style="float: none; height: 50px;"></div>
@@ -32,8 +37,22 @@
 		<h2>Data collecting</h2>
 		<div style="justify-content: center; margin: auto; width: 80%; margin-top: 10px;">
 			<p>
-				Most of the data collecting infrastructure has been set up on <a href="https://aws.amazon.com/">AWS Cloud Services</a>. 
+				Most of the data collecting infrastructure has been set up on <a href="https://aws.amazon.com/">AWS Cloud Services</a>, as shown on the diagram below.
 			</p>
+			<img src="HTML_page/LoLDataRocketAWSDiagram.png" alt="AWS Diagram">
+			<p>
+				In order to extract the data from the matches, first we need to get ids of those matches. Since the project started on a small scale, I had used a couple of python script that crawled through
+				the players and their matches obtaining sizeable numbers of player ids as well as match ids. Those match ids were enough to download meaningful amounts of data. However, as downloading 
+				match data is more exhausting for the API (because the limits are strict) and therefore to personal computers, cloud-based computing became a much more efficient solution. AWS lambda function is tasked with getting the match ids
+				using Riot-X-Token as an authenticator and then store the data in the S3 bucket. To easily provide match ids for the lambda, Simple Queue Service (SQS) was created where match ids 
+				in packets of 100 match ids per message were queued. Another SQS held the Riot-X-Tokens which proved to be more efficient than including the token directly, as SQS allows for better
+				scalability - each Riot-X-Token in the queue triggers a new lambda function. After all the match data is stored in S3, Athena and AWS Glue have been used to extract only the necessary 
+				information from those matches and download it for the analysis.
+			</p>
+		</div>
+		<h2>Data analysis</h2>
+		<div style="justify-content: center; margin: auto; width: 80%; margin-top: 10px;">
+			<p>Hello</p>
 		</div>
 	</body>
 </html>

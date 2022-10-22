@@ -262,9 +262,7 @@
 
 				plotData = championData.filter(chooseTheChampion);
 				plotData = plotData.filter(chooseTheLane);
-				console.log(games_cutoff);
-				plotData = plotData.filter(filterCount);			
-				console.log(plotData);
+				plotData = plotData.filter(filterCount);
 				if (plotData.length == 0)
 				{
 					document.getElementById("chart").style.display = "none";
@@ -291,7 +289,6 @@
 				vDiv.children[4].textContent = playerTwo + " playing against " + playerOne;
 
 				theOneAndOnly = plotData.filter(chooseTheChampionTwo);
-				console.log(theOneAndOnly);
 				if (theOneAndOnly.length == 0)
 				{
 					vDiv.children[8].textContent = "No data";
@@ -390,6 +387,7 @@
 		<div class="navbar">
 			<a href="index.html">Home</a>
 			<a href="counter.html">Choose your counter</a>
+			<a href="analysis.html">Analysis</a>
 			<a href="about.html">About</a>
 		</div>
 		<div style="float: none; height: 50px;"></div>
